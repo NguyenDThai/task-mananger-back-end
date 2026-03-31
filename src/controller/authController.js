@@ -54,11 +54,19 @@ export const login = async (req, res) => {
     // 6. loại bỏ password
     const { password: _, ...userData } = user.toObject();
 
+    // Set token lên cookie
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 24 * 60 * 60 * 1000,
+      sameSite: "lax",
+    });
+
     // 7. trả về
     res.json({
       message: "Đăng nhập thành công",
       user: userData,
-      token,
     });
   } catch (error) {
     res.status(500).json({
@@ -128,4 +136,26 @@ export const register = async (req, res) => {
       error: error.message,
     });
   }
+};
+// Get Current User
+export const getMe = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+    res.json({
+      user,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
+
+// Logout
+export const logout = (req, res) => {
+  res.clearCookie("token");
+  res.json({
+    message: "Đăng xuất thành công",
+  });
 };
