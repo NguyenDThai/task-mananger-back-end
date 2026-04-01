@@ -1,25 +1,16 @@
-import Task from "../models/Task.js";
+import Task from '../models/Task.js';
 
 // @desc    Tạo task mới
 // @route   POST /api/tasks
 // @access  Private
 export const createTask = async (req, res) => {
   try {
-    const {
-      name,
-      assignee,
-      status,
-      dueDate,
-      estimated,
-      priority,
-      labels,
-      parentTask,
-    } = req.body;
+    const { name, assignee, status, dueDate, estimated, priority, labels, parentTask } = req.body;
 
     // 1. Kiểm tra các trường bắt buộc
     if (!name || !assignee || !dueDate) {
       return res.status(400).json({
-        message: "Tên task, người thực hiện và ngày hết hạn là bắt buộc",
+        message: 'Tên task, người thực hiện và ngày hết hạn là bắt buộc',
       });
     }
 
@@ -43,18 +34,15 @@ export const createTask = async (req, res) => {
     }
 
     // 4. Populate thông tin người dùng trước khi trả về
-    const populatedTask = await Task.findById(task._id).populate(
-      "assignee",
-      "name avatar",
-    );
+    const populatedTask = await Task.findById(task._id).populate('assignee', 'name avatar');
 
     res.status(201).json({
-      message: "Tạo task thành công",
+      message: 'Tạo task thành công',
       task: populatedTask,
     });
   } catch (error) {
     res.status(500).json({
-      message: "Lỗi Server",
+      message: 'Lỗi Server',
       error: error.message,
     });
   }
@@ -67,20 +55,20 @@ export const getTasks = async (req, res) => {
   try {
     const tasks = await Task.find({ parentTask: null })
       .populate({
-        path: "assignee",
-        select: "name avatar",
+        path: 'assignee',
+        select: 'name avatar',
       })
       .populate({
-        path: "subtasks",
+        path: 'subtasks',
         populate: {
-          path: "assignee",
-          select: "name avatar",
+          path: 'assignee',
+          select: 'name avatar',
         },
       })
       .sort({ createdAt: -1 });
 
-    res.json({ tasks });
+    return res.json({ tasks });
   } catch (error) {
-    res.status(500).json({ message: "Lỗi Server", error: error.message });
+    return res.status(500).json({ message: 'Lỗi Server', error: error.message });
   }
 };

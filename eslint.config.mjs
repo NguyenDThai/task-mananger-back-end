@@ -1,13 +1,13 @@
-import js from "@eslint/js";
-import globals from "globals";
-import prettier from "eslint-plugin-prettier";
-import configPrettier from "eslint-config-prettier";
-import pluginImport from "eslint-plugin-import";
+import js from '@eslint/js';
+import configPrettier from 'eslint-config-prettier';
+import pluginImport from 'eslint-plugin-import';
+import prettier from 'eslint-plugin-prettier';
+import globals from 'globals';
 
 export default [
   // 1. Files / Folder ignoring (Replaces .eslintignore)
   {
-    ignores: ["node_modules/", "dist/", ".env", ".husky/", "**/test/**", "lint_output.txt"],
+    ignores: ['node_modules/', 'dist/', '.env', '.husky/', '**/test/**', 'lint_output.txt'],
   },
 
   // 2. Base Configuration
@@ -15,10 +15,10 @@ export default [
   configPrettier,
 
   {
-    files: ["**/*.js", "**/*.mjs", "**/*.cjs"],
+    files: ['**/*.js', '**/*.mjs', '**/*.cjs'],
     languageOptions: {
-      ecmaVersion: "latest",
-      sourceType: "module",
+      ecmaVersion: 'latest',
+      sourceType: 'module',
       globals: {
         ...globals.node,
       },
@@ -29,28 +29,36 @@ export default [
     },
     rules: {
       // Console log is key for backend
-      "no-console": "off",
-      "no-unused-vars": ["error", { argsIgnorePattern: "^next" }],
-      "no-var": "error",
-      "prefer-const": "error",
+      'no-console': 'off',
+      'no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^next',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
+      'no-var': 'error',
+      'prefer-const': 'error',
 
       // Importing standards
-      "import/order": [
-        "error",
+      'import/order': [
+        'error',
         {
-          groups: ["builtin", "external", "internal", ["parent", "sibling", "index"]],
-          "newlines-between": "always",
-          alphabetize: { order: "asc", caseInsensitive: true },
+          groups: ['builtin', 'external', 'internal', ['parent', 'sibling', 'index']],
+          'newlines-between': 'always',
+          alphabetize: { order: 'asc', caseInsensitive: true },
         },
       ],
 
       // Prettier Integration
-      "prettier/prettier": "error",
+      'prettier/prettier': 'error',
+      'no-useless-catch': 'off',
     },
     settings: {
-      "import/resolver": {
+      'import/resolver': {
         node: {
-          extensions: [".js", ".json"],
+          extensions: ['.js', '.json'],
         },
       },
     },

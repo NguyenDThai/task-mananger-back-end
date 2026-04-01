@@ -1,5 +1,5 @@
-import mongoose from "mongoose";
-import bcrypt from "bcrypt";
+import bcrypt from 'bcrypt';
+import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema(
   {
@@ -20,25 +20,25 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: function () {
-        return this.provider === "local";
+        return this.provider === 'local';
       },
     },
 
     provider: {
       type: String,
-      enum: ["local", "google"],
-      default: "local",
+      enum: ['local', 'google'],
+      default: 'local',
     },
 
     avatar: {
       type: String,
-      default: "",
+      default: '',
     },
 
     role: {
       type: String,
-      enum: ["user", "admin"],
-      default: "user",
+      enum: ['user', 'admin'],
+      default: 'user',
     },
   },
   {
@@ -47,8 +47,8 @@ const userSchema = new mongoose.Schema(
 );
 
 // hash password
-userSchema.pre("save", async function () {
-  if (!this.isModified("password")) return;
+userSchema.pre('save', async function () {
+  if (!this.isModified('password')) return;
 
   try {
     this.password = await bcrypt.hash(this.password, 10);
@@ -62,4 +62,4 @@ userSchema.methods.comparePassword = async function (password) {
   return bcrypt.compare(password, this.password);
 };
 
-export default mongoose.model("User", userSchema);
+export default mongoose.model('User', userSchema);

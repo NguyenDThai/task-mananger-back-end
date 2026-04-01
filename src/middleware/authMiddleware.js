@@ -1,15 +1,14 @@
-import jwt from "jsonwebtoken";
-import User from "../models/User.js";
+import jwt from 'jsonwebtoken';
+
+import User from '../models/User.js';
 
 export const protect = async (req, res, next) => {
-  let token;
-
   // 1. Lấy token từ cookie
-  token = req.cookies.token;
+  const token = req.cookies.token;
 
   if (!token) {
     return res.status(401).json({
-      message: "Bạn chưa đăng nhập",
+      message: 'Bạn chưa đăng nhập',
     });
   }
 
@@ -21,16 +20,16 @@ export const protect = async (req, res, next) => {
     const currentUser = await User.findById(decoded.id);
     if (!currentUser) {
       return res.status(401).json({
-        message: "Người dùng không còn tồn tại",
+        message: 'Người dùng không còn tồn tại',
       });
     }
 
     // 4. Gán user vào request
     req.user = currentUser;
     next();
-  } catch (error) {
+  } catch (_error) {
     return res.status(401).json({
-      message: "Token không hợp lệ hoặc đã hết hạn",
+      message: 'Token không hợp lệ hoặc đã hết hạn',
     });
   }
 };

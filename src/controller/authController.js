@@ -1,5 +1,6 @@
-import User from "../models/User.js";
-import jwt from "jsonwebtoken";
+import jwt from 'jsonwebtoken';
+
+import User from '../models/User.js';
 
 export const login = async (req, res) => {
   try {
@@ -10,7 +11,7 @@ export const login = async (req, res) => {
     // 1. validate input
     if (!email || !password) {
       return res.status(400).json({
-        message: "Email và password là bắt buộc",
+        message: 'Email và password là bắt buộc',
       });
     }
 
@@ -19,14 +20,14 @@ export const login = async (req, res) => {
 
     if (!user) {
       return res.status(400).json({
-        message: "Email không tồn tại",
+        message: 'Email không tồn tại',
       });
     }
 
     // 3. check provider
-    if (user.provider !== "local") {
+    if (user.provider !== 'local') {
       return res.status(400).json({
-        message: "Vui lòng đăng nhập bằng Google",
+        message: 'Vui lòng đăng nhập bằng Google',
       });
     }
 
@@ -35,7 +36,7 @@ export const login = async (req, res) => {
 
     if (!isMatch) {
       return res.status(400).json({
-        message: "Sai mật khẩu",
+        message: 'Sai mật khẩu',
       });
     }
 
@@ -47,30 +48,29 @@ export const login = async (req, res) => {
       },
       process.env.JWT_SECRET,
       {
-        expiresIn: "1d",
+        expiresIn: '1d',
       },
     );
 
     // 6. loại bỏ password
-    const { password: _, ...userData } = user.toObject();
+    const { password: _password, ...userData } = user.toObject();
 
     // Set token lên cookie
-    res.cookie("token", token, {
+    res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: process.env.NODE_ENV === 'production',
       maxAge: 24 * 60 * 60 * 1000,
-      sameSite: "lax",
+      sameSite: 'lax',
     });
 
     // 7. trả về
     res.json({
-      message: "Đăng nhập thành công",
+      message: 'Đăng nhập thành công',
       user: userData,
     });
   } catch (error) {
     res.status(500).json({
-      message: "Server error",
+      message: 'Server error',
       error: error.message,
     });
   }
@@ -84,12 +84,12 @@ export const register = async (req, res) => {
     // 1. validate input
     if (!name || !email || !password || !confirmPassword) {
       return res.status(400).json({
-        message: "Vui lòng nhập đầy đủ thông tin",
+        message: 'Vui lòng nhập đầy đủ thông tin',
       });
     }
     if (password !== confirmPassword) {
       return res.status(400).json({
-        message: "Mật khẩu không khớp",
+        message: 'Mật khẩu không khớp',
       });
     }
 
@@ -98,7 +98,7 @@ export const register = async (req, res) => {
 
     if (existingUser) {
       return res.status(400).json({
-        message: "Email đã được sử dụng",
+        message: 'Email đã được sử dụng',
       });
     }
 
@@ -117,22 +117,22 @@ export const register = async (req, res) => {
       },
       process.env.JWT_SECRET,
       {
-        expiresIn: "1d",
+        expiresIn: '1d',
       },
     );
 
     // 5. loại bỏ password
-    const { password: _, ...userData } = user.toObject();
+    const { password: _password, ...userData } = user.toObject();
 
     // 6. response
     res.status(201).json({
-      message: "Đăng ký thành công",
+      message: 'Đăng ký thành công',
       user: userData,
       token,
     });
   } catch (error) {
     res.status(500).json({
-      message: "Server error",
+      message: 'Server error',
       error: error.message,
     });
   }
@@ -140,13 +140,13 @@ export const register = async (req, res) => {
 // Get Current User
 export const getMe = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select("-password");
+    const user = await User.findById(req.user.id).select('-password');
     res.json({
       user,
     });
   } catch (error) {
     res.status(500).json({
-      message: "Server error",
+      message: 'Server error',
       error: error.message,
     });
   }
@@ -155,11 +155,11 @@ export const getMe = async (req, res) => {
 // Get All Users
 export const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find({}).select("-password");
+    const users = await User.find({}).select('-password');
     res.json({ users });
   } catch (error) {
     res.status(500).json({
-      message: "Server error",
+      message: 'Server error',
       error: error.message,
     });
   }
@@ -167,8 +167,8 @@ export const getAllUsers = async (req, res) => {
 
 // Logout
 export const logout = (req, res) => {
-  res.clearCookie("token");
+  res.clearCookie('token');
   res.json({
-    message: "Đăng xuất thành công",
+    message: 'Đăng xuất thành công',
   });
 };

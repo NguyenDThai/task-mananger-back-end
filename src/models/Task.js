@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const taskSchema = new mongoose.Schema(
   {
@@ -9,13 +9,13 @@ const taskSchema = new mongoose.Schema(
     },
     assignee: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
     },
     status: {
       type: String,
-      enum: ["None", "Doing", "Stuck", "Pending", "Done"],
-      default: "None",
+      enum: ['None', 'Doing', 'Stuck', 'Pending', 'Done'],
+      default: 'None',
     },
     dueDate: {
       type: Date, // Properly set as Date
@@ -23,12 +23,12 @@ const taskSchema = new mongoose.Schema(
     },
     estimated: {
       type: String,
-      default: "",
+      default: '',
     },
     priority: {
       type: String,
-      enum: ["High", "Medium", "Low"],
-      default: "Medium",
+      enum: ['High', 'Medium', 'Low'],
+      default: 'Medium',
     },
     labels: [
       {
@@ -39,20 +39,20 @@ const taskSchema = new mongoose.Schema(
     subtasks: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Task",
+        ref: 'Task',
       },
     ],
     // Alternatively, parentTask field for easier flat queries
     parentTask: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Task",
+      ref: 'Task',
       default: null,
     },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-const Task = mongoose.model("Task", taskSchema);
+const Task = mongoose.model('Task', taskSchema);
 export default Task;
