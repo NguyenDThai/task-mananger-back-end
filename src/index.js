@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
 import authRoutes from "./routes/authRoutes.js";
+import taskRoutes from "./routes/taskRoutes.js";
 import cookieParser from "cookie-parser";
 
 dotenv.config();
@@ -18,6 +19,7 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 app.use("/api/auth", authRoutes);
+app.use("/api/task", taskRoutes);
 
 mongoose
   .connect(process.env.MONGO_URI)
