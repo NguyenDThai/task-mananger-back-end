@@ -6,8 +6,6 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    console.log(email, password);
-
     // 1. validate input
     if (!email || !password) {
       return res.status(400).json({
@@ -61,6 +59,7 @@ export const login = async (req, res) => {
       secure: process.env.NODE_ENV === 'production',
       maxAge: 24 * 60 * 60 * 1000,
       sameSite: 'lax',
+      path: '/',
     });
 
     // 7. trả về
