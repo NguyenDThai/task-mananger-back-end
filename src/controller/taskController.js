@@ -27,6 +27,7 @@ export const createTask = async (req, res) => {
       priority: priority || 'Medium',
       labels: labels || [],
       parentTask: parentTask || null,
+      createdBy: req.user.id,
     });
 
     // 3. Nếu đây là subtask, cập nhật mảng subtasks của task cha
@@ -37,7 +38,9 @@ export const createTask = async (req, res) => {
     }
 
     // 4. Populate thông tin người dùng trước khi trả về
-    const populatedTask = await Task.findById(task._id).populate('assignee', 'name avatar');
+    const populatedTask = await Task.findById(task._id)
+      .populate('assignee', 'name avatar')
+      .populate('createdBy', 'name avatar');
 
     res.status(201).json({
       message: 'Tạo task thành công',
@@ -68,6 +71,7 @@ export const getTasks = async (req, res) => {
           select: 'name avatar',
         },
       })
+      .populate('createdBy', 'name avatar')
       .sort({ createdAt: -1 });
 
     return res.json({ tasks });
@@ -83,6 +87,7 @@ export const getTaskById = async (req, res) => {
   try {
     const task = await Task.findById(req.params.id)
       .populate('assignee', 'name avatar')
+      .populate('createdBy', 'name avatar')
       .populate({
         path: 'subtasks',
         populate: { path: 'assignee', select: 'name avatar' },
@@ -106,7 +111,9 @@ export const updateTask = async (req, res) => {
     const task = await Task.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
-    }).populate('assignee', 'name avatar');
+    })
+      .populate('assignee', 'name avatar')
+      .populate('createdBy', 'name avatar');
 
     if (!task) {
       return res.status(404).json({ message: 'Task không tồn tại' });
