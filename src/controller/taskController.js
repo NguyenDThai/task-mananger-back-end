@@ -8,7 +8,7 @@ import Task from '../models/Task.js';
 // @access  Private
 export const createTask = async (req, res) => {
   try {
-    const { name, assignee, status, dueDate, estimated, priority, labels, parentTask } = req.body;
+    const { name, status, dueDate, estimated, priority, labels, parentTask } = req.body;
 
     // 1. Kiểm tra trường tên (bắt buộc duy nhất để hỗ trợ Quick Add)
     if (!name) {
@@ -16,11 +16,9 @@ export const createTask = async (req, res) => {
         message: 'Tên công việc là bắt buộc',
       });
     }
-
-    // 2. Tạo task mới (Lấy user đang đăng nhập làm mặc định nếu không có assignee)
+    // 2. Tạo task mới
     const task = await Task.create({
       name,
-      assignee: assignee || req.user.id,
       status: status || 'None',
       dueDate: dueDate || new Date(),
       estimated: estimated || '',
@@ -38,9 +36,7 @@ export const createTask = async (req, res) => {
     }
 
     // 4. Populate thông tin người dùng trước khi trả về
-    const populatedTask = await Task.findById(task._id)
-      .populate('assignee', 'name avatar')
-      .populate('createdBy', 'name avatar');
+    const populatedTask = await Task.findById(task._id).populate('createdBy', 'name avatar');
 
     res.status(201).json({
       message: 'Tạo task thành công',
@@ -61,15 +57,8 @@ export const getTasks = async (req, res) => {
   try {
     const tasks = await Task.find({ parentTask: null })
       .populate({
-        path: 'assignee',
-        select: 'name avatar',
-      })
-      .populate({
         path: 'subtasks',
-        populate: {
-          path: 'assignee',
-          select: 'name avatar',
-        },
+        populate: { path: 'createdBy', select: 'name avatar' },
       })
       .populate('createdBy', 'name avatar')
       .sort({ createdAt: -1 });
@@ -86,11 +75,10 @@ export const getTasks = async (req, res) => {
 export const getTaskById = async (req, res) => {
   try {
     const task = await Task.findById(req.params.id)
-      .populate('assignee', 'name avatar')
       .populate('createdBy', 'name avatar')
       .populate({
         path: 'subtasks',
-        populate: { path: 'assignee', select: 'name avatar' },
+        populate: { path: 'createdBy', select: 'name avatar' },
       });
 
     if (!task) {
@@ -111,9 +99,7 @@ export const updateTask = async (req, res) => {
     const task = await Task.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
-    })
-      .populate('assignee', 'name avatar')
-      .populate('createdBy', 'name avatar');
+    }).populate('createdBy', 'name avatar');
 
     if (!task) {
       return res.status(404).json({ message: 'Task không tồn tại' });
