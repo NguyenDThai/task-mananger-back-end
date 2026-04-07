@@ -8,7 +8,8 @@ import Task from '../models/Task.js';
 // @access  Private
 export const createTask = async (req, res) => {
   try {
-    const { name, status, dueDate, estimated, priority, labels, parentTask } = req.body;
+    const { name, status, dueDate, estimated, priority, labels, parentTask, description } =
+      req.body;
 
     // 1. Kiểm tra trường tên (bắt buộc duy nhất để hỗ trợ Quick Add)
     if (!name) {
@@ -19,6 +20,7 @@ export const createTask = async (req, res) => {
     // 2. Tạo task mới
     const task = await Task.create({
       name,
+      description: description || '',
       status: status || 'None',
       dueDate: dueDate || new Date(),
       estimated: estimated || '',
