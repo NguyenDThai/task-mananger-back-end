@@ -175,3 +175,25 @@ export const deleteTask = async (req, res) => {
     res.status(500).json({ message: 'Lỗi Server', error: error.message });
   }
 };
+
+// @desc    Xóa nhiều task
+// @route   POST /api/tasks/bulk-delete
+// @access  Private
+export const bulkDeleteTasks = async (req, res) => {
+  try {
+    const { ids } = req.body;
+    if (!ids || !Array.isArray(ids)) {
+      return res.status(400).json({ message: 'Danh sách ID không hợp lệ' });
+    }
+
+    // Xóa các task
+    const result = await Task.deleteMany({ _id: { $in: ids } });
+
+    // Cập nhật các task cha nếu có can thiệp xóa subtasks
+    await Task.updateMany({ subtasks: { $in: ids } }, { $pull: { subtasks: { $in: ids } } });
+
+    res.json({ message: `Đã xóa ${result.deletedCount} task thành công` });
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi Server', error: error.message });
+  }
+};

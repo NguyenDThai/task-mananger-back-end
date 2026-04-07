@@ -6,6 +6,7 @@ import {
   getTaskById,
   updateTask,
   deleteTask,
+  bulkDeleteTasks,
 } from '../controller/taskController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
@@ -17,5 +18,6 @@ router.get('/', protect, getTasks);
 router.get('/:id', protect, getTaskById);
 router.patch('/:id', protect, updateTask);
 router.delete('/:id', protect, deleteTask);
+router.post('/bulk-delete', protect, bulkDeleteTasks);
 
 export default router;
