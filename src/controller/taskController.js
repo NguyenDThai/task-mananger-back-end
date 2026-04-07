@@ -58,9 +58,13 @@ export const getTasks = async (req, res) => {
     const tasks = await Task.find({ parentTask: null })
       .populate({
         path: 'subtasks',
-        populate: { path: 'createdBy', select: 'name avatar' },
+        populate: [
+          { path: 'createdBy', select: 'name avatar' },
+          { path: 'assignees', select: 'name avatar' },
+        ],
       })
       .populate('createdBy', 'name avatar')
+      .populate('assignees', 'name avatar')
       .sort({ createdAt: -1 });
 
     return res.json({ tasks });
@@ -76,9 +80,13 @@ export const getTaskById = async (req, res) => {
   try {
     const task = await Task.findById(req.params.id)
       .populate('createdBy', 'name avatar')
+      .populate('assignees', 'name avatar')
       .populate({
         path: 'subtasks',
-        populate: { path: 'createdBy', select: 'name avatar' },
+        populate: [
+          { path: 'createdBy', select: 'name avatar' },
+          { path: 'assignees', select: 'name avatar' },
+        ],
       });
 
     if (!task) {
@@ -96,10 +104,43 @@ export const getTaskById = async (req, res) => {
 // @access  Private
 export const updateTask = async (req, res) => {
   try {
-    const task = await Task.findByIdAndUpdate(req.params.id, req.body, {
+    // const task = await Task.findByIdAndUpdate(req.params.id, req.body, {
+    //   new: true,
+    //   runValidators: true,
+    // }).populate('createdBy', 'name avatar');
+
+    // if (!task) {
+    //   return res.status(404).json({ message: 'Task không tồn tại' });
+    // }
+
+    // res.json(task);
+
+    const { addAssignees, removeAssignees, ...updateData } = req.body;
+
+    const updateQuery = {
+      $set: updateData,
+    };
+
+    // Thêm người không trùng
+    if (addAssignees && addAssignees.length > 0) {
+      updateQuery.$addToSet = {
+        assignees: { $each: addAssignees },
+      };
+    }
+
+    // Xóa người
+    if (removeAssignees && removeAssignees.length > 0) {
+      updateQuery.$pull = {
+        assignees: { $in: removeAssignees },
+      };
+    }
+
+    const task = await Task.findByIdAndUpdate(req.params.id, updateQuery, {
       new: true,
       runValidators: true,
-    }).populate('createdBy', 'name avatar');
+    })
+      .populate('createdBy', 'name avatar')
+      .populate('assignees', 'name avatar');
 
     if (!task) {
       return res.status(404).json({ message: 'Task không tồn tại' });

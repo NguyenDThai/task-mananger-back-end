@@ -43,6 +43,9 @@ const taskSchema = new mongoose.Schema(
       ref: 'Task',
       default: null,
     },
+    // Người được giao task
+    assignees: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    // Người tạo tasks
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
