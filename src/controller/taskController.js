@@ -17,6 +17,13 @@ export const createTask = async (req, res) => {
         message: 'Tên công việc là bắt buộc',
       });
     }
+
+    // Tìm task cuối cùng trong cột để xếp task mới xuống dưới cùng
+    const lastTask = await Task.findOne({ status: status || 'None', parentTask: null }).sort(
+      '-position',
+    );
+    const newPosition = lastTask ? lastTask.position + 1 : 0;
+
     // 2. Tạo task mới
     const task = await Task.create({
       name,
@@ -28,6 +35,7 @@ export const createTask = async (req, res) => {
       labels: labels || [],
       parentTask: parentTask || null,
       createdBy: req.user.id,
+      position: newPosition,
     });
 
     // 3. Nếu đây là subtask, cập nhật mảng subtasks của task cha
@@ -67,7 +75,7 @@ export const getTasks = async (req, res) => {
       })
       .populate('createdBy', 'name avatar')
       .populate('assignees', 'name avatar')
-      .sort({ createdAt: -1 });
+      .sort({ position: 1 });
 
     return res.json({ tasks });
   } catch (error) {
