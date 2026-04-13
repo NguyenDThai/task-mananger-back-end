@@ -88,10 +88,10 @@ export const createTask = async (req, res) => {
       });
     }
 
-    // Tìm task cuối cùng trong cột để xếp task mới xuống dưới cùng
+    // Tìm task đầu tiên trong cột để xếp task mới lên TRÊN CÙNG
     const query = parentTask ? { parentTask } : { status: status || 'None', parentTask: null };
-    const lastTask = await Task.findOne(query).sort('-position');
-    const newPosition = lastTask ? lastTask.position + 1000 : 1000;
+    const firstTask = await Task.findOne(query).sort('position');
+    const newPosition = firstTask ? firstTask.position - 1000 : 1000;
 
     // 2. Tạo task mới
     const task = await Task.create({
@@ -134,6 +134,10 @@ export const createTask = async (req, res) => {
 // @access  Private
 export const getTasks = async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+
     const tasks = await Task.find({ parentTask: null })
       .populate({
         path: 'subtasks',
@@ -145,9 +149,21 @@ export const getTasks = async (req, res) => {
       })
       .populate('createdBy', 'name avatar')
       .populate('assignees', 'name avatar')
-      .sort({ position: 1 });
+      .sort({ position: 1 })
+      .skip(skip)
+      .limit(limit);
 
-    return res.json({ tasks });
+    const totalTasks = await Task.countDocuments({ parentTask: null });
+    const hasMore = skip + tasks.length < totalTasks;
+
+    return res.json({
+      tasks,
+      pagination: {
+        currentPage: page,
+        totalTasks,
+        hasMore,
+      },
+    });
   } catch (error) {
     return res.status(500).json({ message: 'Lỗi Server', error: error.message });
   }
