@@ -1,3 +1,4 @@
+import { v2 as cloudinary } from 'cloudinary';
 import jwt from 'jsonwebtoken';
 
 import User from '../models/User.js';
@@ -170,4 +171,44 @@ export const logout = (req, res) => {
   res.json({
     message: 'Đăng xuất thành công',
   });
+};
+
+export const updateAvatar = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+
+    // 1. Tìm user hiện tại để lấy URL ảnh cũ
+    const user = await User.findById(userId);
+
+    if (user && user.avatar) {
+      // Trích xuất public_id từ URL (Cloudinary URL có dạng: .../folder_name/id.jpg)
+      // Ví dụ: "avatars/abc123xyz"
+      const publicId = user.avatar.split('/').pop().split('.')[0];
+      const folderName = 'avatars'; // Tên folder đặt trong config
+
+      // Xóa ảnh cũ trên Cloudinary
+      await cloudinary.uploader.destroy(`${folderName}/${publicId}`);
+    }
+
+    // 2. Cập nhật URL ảnh mới
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { avatar: req.file.path },
+      { new: true },
+    );
+
+    res.json({
+      message: 'Avatar updated successfully',
+      user: updatedUser,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Server error',
+      error: error.message,
+    });
+  }
 };
