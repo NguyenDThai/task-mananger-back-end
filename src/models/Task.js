@@ -58,6 +58,7 @@ const taskSchema = new mongoose.Schema(
     position: {
       type: Number,
       default: 0,
+      index: true,
     },
   },
   {
