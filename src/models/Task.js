@@ -55,6 +55,11 @@ const taskSchema = new mongoose.Schema(
       ref: 'User',
       required: true,
     },
+    position: {
+      type: Number,
+      default: 0,
+      index: true,
+    },
   },
   {
     timestamps: true,
