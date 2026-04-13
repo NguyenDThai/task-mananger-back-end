@@ -299,3 +299,29 @@ export const bulkDeleteTasks = async (req, res) => {
     res.status(500).json({ message: 'Lỗi Server', error: error.message });
   }
 };
+
+export const getTaskStats = async (req, res) => {
+  try {
+    const stats = await Task.aggregate([
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    // Tinh tong so task
+    const totalTasks = await Task.countDocuments();
+
+    const formattedStats = {
+      total: totalTasks,
+    };
+    stats.forEach((item) => {
+      formattedStats[item._id] = item.count;
+    });
+    res.json(formattedStats);
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi Server', error: error.message });
+  }
+};
